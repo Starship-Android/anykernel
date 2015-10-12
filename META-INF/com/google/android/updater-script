@@ -1,0 +1,98 @@
+ui_print("Installing Starship Kernel for Shamu");
+ui_print(" ");
+ui_print("AnyKernel2 by osm0sis @ xda-developers");
+ui_print(" ");
+ui_print(" ");
+show_progress(0.100000, 0);
+
+assert(package_extract_dir("", "/tmp/anykernel"));
+ui_print(file_getprop("/tmp/anykernel/anykernel.sh", "kernel.string"));
+ui_print("");
+ui_print("");
+ui_print("Mounting System");
+run_program("/sbin/busybox", "mount", "/system");
+run_program("/sbin/busybox", "mount", "/data");
+ui_print("");
+ui_print("");
+
+ifelse(file_getprop("/tmp/anykernel/anykernel.sh", "do.devicecheck") == 1,
+  (ui_print("Checking device...");
+   ui_print(" ");
+   assert(getprop("ro.product.device") == file_getprop("/tmp/anykernel/anykernel.sh", "device.name1") || getprop("ro.build.product") == file_getprop("/tmp/anykernel/anykernel.sh", "device.name1"));
+  )
+);
+
+delete_recursive("/data/N4UKM", "/data/UKM");
+delete("/system/etc/init.d/N4UKM", "/system/etc/init.d/UKM", "/system/etc/init.d/UKM_WAKE", "/system/xbin/uci", "/system/addon.d/UKM.sh");
+set_progress(0.300000);
+
+package_extract_dir("data", "/data");
+run_program("/sbin/sh", "-c", "mkdir /system/etc/init.d");
+run_program("/sbin/sh", "-c", "mkdir /system/addon.d");
+set_perm_recursive(0, 0, 0755, 0755, "/system/etc/init.d");
+set_perm_recursive(0, 0, 0755, 0755, "/system/addon.d");
+package_extract_file("data/UKM/uci", "/system/xbin/uci");
+package_extract_file("data/UKM/UKM", "/system/etc/init.d/UKM");
+package_extract_file("data/UKM/UKM.sh", "/system/addon.d/UKM.sh");
+set_progress(0.500000);
+
+set_perm_recursive(0, 0, 0755, 0755, "/data/UKM");
+set_perm(0, 0, 0755, "/system/xbin/uci");
+set_perm(0, 0, 0755, "/system/etc/init.d/UKM");
+set_perm(0, 0, 0755, "/system/addon.d/UKM.sh");
+set_progress(0.700000);
+
+
+ui_print("Starting Scripts...");
+ifelse(file_getprop("/tmp/anykernel/anykernel.sh", "do.system") == 1,
+	package_extract_dir("system", "/system");
+	set_perm_recursive(0, 2000, 0755, 0755, "/system/su.d");
+	set_perm_recursive(0, 2000, 0777, 0777, "/system/etc/init.d/amplitude_init");
+);
+
+ui_print("Installing kernel...");
+run_program("/sbin/sh", "/tmp/anykernel/anykernel.sh");
+ifelse(run_program("/sbin/sh", "-c", "test `cat /tmp/anykernel/exitcode` == 1") == 0, 
+  (unmount("/system");
+   abort();
+  )
+);
+
+# Unmounting filesystems...
+run_program("/sbin/busybox", "umount", "/data");
+run_program("/sbin/busybox", "umount", "/system");
+set_progress(0.900000);
+
+ifelse(file_getprop("/tmp/anykernel/anykernel.sh", "do.cleanup") == 1,
+  (delete_recursive("/tmp/anykernel");
+  )
+);
+
+ui_print("");
+ui_print("");
+ui_print("");
+ui_print("Kernel Installed");
+set_progress(1.000000);
+ui_print(" ");
+ui_print(" ");
+ui_print("###          Starship Kernel       ###");
+ui_print("###               L-Class          ###");
+ui_print("###           Shamu Booster        ###");
+ui_print("###               r_3.0            ###");
+ui_print(" ");
+package_extract_file("boot.img", "/dev/block/platform/msm_sdcc.1/by-name/boot");
+set_progress(1.000000);
+ui_print(" ");
+ui_print("###      Countdown to Liftoff In   ###");
+ui_print("###                10              ###");
+ui_print("###                 9              ###");
+ui_print("###                 8              ###");
+ui_print("###                 7              ###");
+ui_print("###                 6              ###");
+ui_print("###                 5              ###");
+ui_print("###                 4              ###");
+ui_print("###                 3              ###");
+ui_print("###                 2              ###");
+ui_print("###                 1              ###");
+ui_print("###             Liftoff!!          ###");
+
